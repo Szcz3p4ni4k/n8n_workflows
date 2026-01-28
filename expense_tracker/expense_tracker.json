@@ -1,0 +1,260 @@
+{
+  "name": "expense_tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        16
+      ],
+      "id": "4806cadd-b6d0-41bd-94c7-7380ddf4f7e9",
+      "name": "Telegram Trigger",
+      "webhookId": "70b2f118-0b35-45ac-b61c-223ab3d2a0bf",
+      "credentials": {
+        "telegramApi": {
+          "id": "try2o5RsFclLPnlv",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "Analyze this receipt image. Extract the following data from it and return it in JSON format (without the ```json markdown blocks): { \"date\": \"DD-MM-YYYY\", \"store\": \"Store name\", \"category\": \"One of: Grocery, Transportation, Home, Entertainment, Other\", \"amount\": \"Amount as a number (use a dot for cents)\", \"description\": \"A short summary of what was purchased (max 5 words)\" }\n"
+            },
+            {
+              "type": "image",
+              "imageType": "base64"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -96,
+        16
+      ],
+      "id": "0cf93a31-b3ff-4bf3-8c1b-7deb231847ec",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "7OHTCuTyiJs5EOkc",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Pobieramy treść odpowiedzi od AI (zakładamy, że jest to czysty JSON)\nconst aiResponse = $input.first().json.output[0].content[0].text\n\n// 2. Szukamy początku i końca klamerek JSON (zabezpieczenie, gdyby AI dodało jakiś tekst przed/po)\nconst jsonStartIndex = aiResponse.indexOf('{');\nconst jsonEndIndex = aiResponse.lastIndexOf('}') + 1;\nconst cleanJson = aiResponse.substring(jsonStartIndex, jsonEndIndex);\n\n// 3. Zamieniamy tekst na obiekt\nreturn JSON.parse(cleanJson);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        16
+      ],
+      "id": "5cb84d57-c3fe-4dff-95b7-a8bc980528ad",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1jh9tLRxQJWfyohUsuOhTlNKz-Z-7bxEoA3acaIqPZHA",
+          "mode": "list",
+          "cachedResultName": "expenses",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET_LINK_HERE"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Arkusz1",
+          "cachedResultUrl": "YOUR_GOOGLE_SHEET_LINK_HERE"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Data": "={{ $json.date }}",
+            "Sklep": "={{ $json.store }}",
+            "Kategoria": "={{ $json.category }}",
+            "Kwota": "={{ $json.amount }}",
+            "Opis": "={{ $json.description }}"
+          },
+          "matchingColumns": [
+            "Data"
+          ],
+          "schema": [
+            {
+              "id": "Data",
+              "displayName": "Data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Sklep",
+              "displayName": "Sklep",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Kategoria",
+              "displayName": "Kategoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Kwota",
+              "displayName": "Kwota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Opis",
+              "displayName": "Opis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        464,
+        16
+      ],
+      "id": "a8b4ea03-b55d-40ff-86e3-17d3bfaa0e08",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "pjhr97hSV5Rf9Sax",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "=Dodano paragon z {{ $json.Sklep }} na kwotę {{ $json.Kwota }} PLN.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        672,
+        16
+      ],
+      "id": "ef8a9d0c-accc-4b7f-95c8-8a9912335298",
+      "name": "Send a text message",
+      "webhookId": "7c343486-5133-41e5-8689-1fd195bb7f03",
+      "credentials": {
+        "telegramApi": {
+          "id": "try2o5RsFclLPnlv",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "9fa1c801-ffba-460c-aba9-90769b8c3f9d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b2b258455893ceb09bbc112ef3eab0867bf45a3af13e95a146beb716ed47dc1"
+  },
+  "id": "Ep2pZe0K8lSTqoBQ3Krf2",
+  "tags": []
+}
