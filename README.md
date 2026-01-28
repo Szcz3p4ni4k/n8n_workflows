@@ -1,32 +1,36 @@
 # n8n_workflows
 
 ## Project Overview
-This project is an automated financial tracking system built with n8n. It leverages Multimodal AI (GPT-4o) to process images of receipts sent via Telegram and automatically logs structured data into a Google Spreadsheet.
-
-The goal of this tool is to eliminate manual data entry for personal finance management by converting unstructured data (images) into structured database records (JSON/CSV) in real-time.
+This project is a comprehensive financial assistant built with n8n. It leverages a dual-architecture approach:
+1.  **Ingestion Pipeline:** Uses GPT-4o Vision to digitize physical receipts sent via Telegram into structured database records.
+2.  **Autonomous AI Agent:** Deploys an LLM-based Agent equipped with custom tools (Google Sheets) to dynamically query financial history, perform calculations, and generate insights in natural language.
 
 ## Features
-* **Image Recognition:** Accepts photos of receipts directly from a Telegram chat.
-* **AI Extraction:** Uses OpenAI's GPT-4o vision capabilities to identify date, merchant, category, total amount, and a brief description.
-* **Data Validation:** Includes a JavaScript logic layer to parse and validate the AI's output before storage.
-* **Cloud Storage:** Automatically appends data to a designated Google Sheet.
-* **User Feedback:** Sends a confirmation message back to the user with the extracted details.
+* **Agentic Workflow:** Utilizes n8n's AI Agent node with "Tool Use" capabilities to autonomously decide when and how to access the database.
+* **Multimodal Input:** Automatically routes image files to the digitization pipeline and text queries to the AI Agent.
+* **Receipt Digitization:** Extracts Date, Merchant, Category, and Amount from photos with high precision.
+* **Dynamic Analytics:** The Agent can answer complex queries (e.g., "Compare my spending on food vs. transport") by executing real-time lookups on the Google Sheet.
 
 ## Tech Stack
-* **Workflow Automation:** n8n (Self-hosted or Cloud)
-* **AI Model:** OpenAI GPT-4o (Chat Model with Vision)
-* **Database:** Google Sheets
-* **Interface:** Telegram Bot API
+* **Workflow Automation:** n8n
+* **AI Architecture:**
+    * **Vision:** OpenAI Chat Model (Receipt Parsing)
+    * **Agent:** OpenAI-powered Agent with Tool Calling
+* **Database:** Google Sheets (connected as a Tool)
 * **Scripting:** JavaScript (ES6) for data transformation
 
 ## Workflow Architecture
-The workflow consists of the following nodes:
+The system logic is divided into two branches via a Switch node:
 
-1.  **Telegram Trigger:** Listens for incoming image messages.
-2.  **OpenAI Node:** Sends the binary image data to the LLM with a system prompt to extract specific fields in JSON format.
-3.  **Code Node:** Executes JavaScript to parse the string response from the LLM into a JSON object and handles potential formatting errors.
-4.  **Google Sheets Node:** Maps the JSON keys to specific spreadsheet columns and appends the row.
-5.  **Telegram Response:** Sends a formatted success message back to the user.
+1.  **Receipt Branch (Image):**
+    * Directs image files to a Vision Model.
+    * Parses the output via JavaScript.
+    * Commits structured data to Google Sheets.
+
+2.  **Analyst Branch (Text):**
+    * Directs text queries to an **AI Agent**.
+    * The Agent is connected to a **Google Sheets Tool**.
+    * Upon receiving a query, the Agent autonomously retrieves relevant rows from the spreadsheet to formulate an answer.
 
 
 ## Setup and Installation
