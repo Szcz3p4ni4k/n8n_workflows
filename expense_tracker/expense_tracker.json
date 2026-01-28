@@ -65,7 +65,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// 1. Pobieramy treść odpowiedzi od AI (zakładamy, że jest to czysty JSON)\nconst aiResponse = $input.first().json.output[0].content[0].text\n\n// 2. Szukamy początku i końca klamerek JSON (zabezpieczenie, gdyby AI dodało jakiś tekst przed/po)\nconst jsonStartIndex = aiResponse.indexOf('{');\nconst jsonEndIndex = aiResponse.lastIndexOf('}') + 1;\nconst cleanJson = aiResponse.substring(jsonStartIndex, jsonEndIndex);\n\n// 3. Zamieniamy tekst na obiekt\nreturn JSON.parse(cleanJson);"
+        "jsCode": "const aiResponse = $input.first().json.output[0].content[0].text\n\nconst jsonStartIndex = aiResponse.indexOf('{');\nconst jsonEndIndex = aiResponse.lastIndexOf('}') + 1;\nconst cleanJson = aiResponse.substring(jsonStartIndex, jsonEndIndex);\n\nreturn JSON.parse(cleanJson);"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
