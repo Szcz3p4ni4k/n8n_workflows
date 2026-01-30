@@ -1,4 +1,4 @@
-# n8n_workflows
+# n8n Smart Expense Tracker & AI Agent
 
 ## Project Overview
 This project is a comprehensive financial assistant built with n8n. It leverages a dual-architecture approach:
