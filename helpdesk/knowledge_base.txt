@@ -1,0 +1,22 @@
+POLITYKA OBSŁUGI ZGŁOSZEŃ I ROZWIĄZYWANIE PROBLEMÓW - TECHCORP
+
+1. DOSTĘP DO VPN
+Błąd 691 przy logowaniu do VPN oznacza błędne hasło lub zablokowane konto domenowe.
+W przypadku problemów z VPN należy najpierw zrestartować klienta Cisco AnyConnect.
+Jeśli to nie pomaga, użytkownik musi zgłosić się do Administratora Sieci (piotr.nowak@techcorp.pl).
+Dostęp do VPN dla nowych pracowników jest nadawany w ciągu 24h od zatrudnienia.
+
+2. RESET HASŁA
+Pracownicy mogą samodzielnie zresetować hasło na stronie reset.techcorp.local.
+Hasło musi składać się z minimum 12 znaków, w tym jednej dużej litery i znaku specjalnego.
+Jeśli pracownik zablokował konto (3 błędne próby), blokada zdejmuje się automatycznie po 30 minutach.
+Helpdesk nie ma możliwości podania starego hasła.
+
+3. WYMIANA SPRZĘTU
+Wymiana laptopa przysługuje co 3 lata.
+Uszkodzony sprzęt (zalana klawiatura, pęknięty ekran) należy dostarczyć do Pokoju 101 (Dział IT, parter).
+W przypadku kradzieży służbowego telefonu, pracownik musi niezwłocznie zgłosić to na policję i przesłać skan protokołu do działu Security.
+
+4. PRACA ZDALNA
+Wniosek o pracę zdalną należy złożyć w systemie HRWork do czwartku poprzedzającego tydzień pracy.
+Na pracy zdalnej pracownik ma obowiązek być dostępny na Slacku w godzinach 9:00 - 17:00.

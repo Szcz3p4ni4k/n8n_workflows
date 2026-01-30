@@ -1,0 +1,392 @@
+{
+  "name": "helpdesk",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "load",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "helpdesk-v2",
+          "mode": "list",
+          "cachedResultName": "helpdesk-v2"
+        },
+        "prompt": "={{ $json.snippet }}",
+        "topK": 3,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "c0cfe781-50d1-4a23-85d5-5fee6f919de6",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "9xKcUS30c6xp4BYY",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        352,
+        192
+      ],
+      "id": "a93e45df-fb71-4fec-8f82-1416f2cd07ae",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "7OHTCuTyiJs5EOkc",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst context = items.map(item => item.json.document.pageContent).join(\"\\n\\n---\\n\\n\");\n\nreturn {\n  json: {\n    context: context\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "8a5b9d2f-9908-4b77-8e2e-1314c21b06b6",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are a helpful technical support employee at TechCorp. Your job is to respond to customer emails using ONLY the documentation below. If the documentation doesn't answer, please indicate that you need to consult with your supervisor.\n\nDOCUMENTATION (CONTEXT): \"\"\" {{ $json.context }} \"\"\"\n\nEMAIL FROM CUSTOMER: \"\"\" {{ $('Gmail Trigger').first().json.snippet }} \"\"\"\n\nWrite a polite, specific response that resolves the issue. Sign off as \"TechCorp Support Bot.\""
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        976,
+        0
+      ],
+      "id": "eabe67c7-1cbc-4aa5-afd0-75e63dab3669",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "7OHTCuTyiJs5EOkc",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#general",
+          "mode": "name"
+        },
+        "message": "=New draft for approval\n\nUser message:  \n\n{{ $('Gmail Trigger').first().json.snippet }}\n\nDraft: \n\n{{ $json.output[0].content[0].text }}",
+        "responseType": "customForm",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "New draft for approval",
+              "fieldLabel": "=",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "send"
+                  },
+                  {
+                    "option": "reject"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "responseFormButtonLabel": "Submit",
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1328,
+        0
+      ],
+      "id": "76203e91-9581-4035-8aea-4637a09bd1a2",
+      "name": "Send message and wait for response",
+      "webhookId": "f3241195-132b-45d7-ad3f-6ec6ad39e87d",
+      "alwaysOutputData": true,
+      "credentials": {
+        "slackApi": {
+          "id": "w3tb5PlxtxXJcpVe",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.data['New draft for approval'] }}",
+                    "rightValue": "=send",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ae7eb54c-377b-46c0-80a6-d020193c8a8a"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "72354dfe-a18d-4220-9ff7-de9c10bc488d",
+                    "leftValue": "={{ $json.data['New draft for approval'] }}",
+                    "rightValue": "reject",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1536,
+        0
+      ],
+      "id": "503de105-db30-4dbc-8cca-7e4955ab5ad1",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').first().json.From }}",
+        "subject": "={{ $('Gmail Trigger').first().json.Subject }}",
+        "emailType": "text",
+        "message": "={{ $('Message a model').item.json.output[0].content[0].text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1744,
+        -96
+      ],
+      "id": "4ed008aa-ef6f-42d9-9d58-9e61167f2b21",
+      "name": "Send a message",
+      "webhookId": "001f3ec0-e6c7-4ece-ab13-44b7fb2854a7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "d1CFYo7o7NMaOC0h",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#general",
+          "mode": "name"
+        },
+        "text": "Email rejected by operator. Message not sent.",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1744,
+        96
+      ],
+      "id": "78c1f2b1-c02f-40c5-b867-f42946772d41",
+      "name": "Send a message1",
+      "webhookId": "e2f8c63d-c8a5-4d49-8d00-07df54a958ff",
+      "credentials": {
+        "slackApi": {
+          "id": "w3tb5PlxtxXJcpVe",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "q": "subject:Problem"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "39d1a41a-a138-4072-97fe-fb30ba0059bd",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "d1CFYo7o7NMaOC0h",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "2b272ac8-b2da-42b7-ba41-4b079b9a70f3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b2b258455893ceb09bbc112ef3eab0867bf45a3af13e95a146beb716ed47dc1"
+  },
+  "id": "5ej5FxcYqokWSTIqHD1tP",
+  "tags": []
+}
