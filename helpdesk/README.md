@@ -1,4 +1,4 @@
-# Intelligent RAG Helpdesk Agent 🤖📧
+# Intelligent RAG Helpdesk Agent
 
 ## Project Overview
 An enterprise-grade automated support system designed to handle technical tickets efficiently. Unlike standard auto-responders, this agent uses **RAG (Retrieval-Augmented Generation)** logic. It understands the context of incoming emails by querying a vector database (Pinecone) for relevant internal documentation before drafting a response using GPT-4o.
