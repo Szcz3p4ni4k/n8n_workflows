@@ -1,0 +1,148 @@
+{
+  "name": "upload_data_pinecone",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e78e5d96-fdf6-41f6-ab85-d3d65c44e525",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      text: `POLITYKA OBSŁUGI ZGŁOSZEŃ I ROZWIĄZYWANIE PROBLEMÓW - TECHCORP\n\n1. DOSTĘP DO VPN\nBłąd 691 przy logowaniu do VPN oznacza błędne hasło lub zablokowane konto domenowe.\nW przypadku problemów z VPN należy najpierw zrestartować klienta Cisco AnyConnect.\nJeśli to nie pomaga, użytkownik musi zgłosić się do Administratora Sieci (piotr.nowak@techcorp.pl).\nDostęp do VPN dla nowych pracowników jest nadawany w ciągu 24h od zatrudnienia.\n\n2. RESET HASŁA\nPracownicy mogą samodzielnie zresetować hasło na stronie reset.techcorp.local.\nHasło musi składać się z minimum 12 znaków, w tym jednej dużej litery i znaku specjalnego.\nJeśli pracownik zablokował konto (3 błędne próby), blokada zdejmuje się automatycznie po 30 minutach.\nHelpdesk nie ma możliwości podania starego hasła.\n\n3. WYMIANA SPRZĘTU\nWymiana laptopa przysługuje co 3 lata.\nUszkodzony sprzęt (zalana klawiatura, pęknięty ekran) należy dostarczyć do Pokoju 101 (Dział IT, parter).\nW przypadku kradzieży służbowego telefonu, pracownik musi niezwłocznie zgłosić to na policję i przesłać skan protokołu do działu Security.\n\n4. PRACA ZDALNA\nWniosek o pracę zdalną należy złożyć w systemie HRWork do czwartku poprzedzającego tydzień pracy.\nNa pracy zdalnej pracownik ma obowiązek być dostępny na Slacku w godzinach 9:00 - 17:00.`\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "34875ded-5aa9-42eb-be47-0bc30998e17c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "helpdesk-v2",
+          "mode": "list",
+          "cachedResultName": "helpdesk-v2"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "90bb5740-d6a4-42ae-acd1-fe79f8e50bcb",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "9xKcUS30c6xp4BYY",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        176
+      ],
+      "id": "27ee24c4-1dd1-4913-ab81-5a1f891eaa5e",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {
+          "stripNewLines": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        304,
+        176
+      ],
+      "id": "0b4472d3-eede-48c0-8a98-64e9aa80a5b1",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "7OHTCuTyiJs5EOkc",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "15d1a8c6-33af-4ce1-bc5a-4159703dd747",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b2b258455893ceb09bbc112ef3eab0867bf45a3af13e95a146beb716ed47dc1"
+  },
+  "id": "_qcGr17v6ShAa-eDpdfPP",
+  "tags": []
+}
